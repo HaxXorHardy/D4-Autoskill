@@ -4,21 +4,30 @@ Diablo IV AutoSkill is a Python script that automatically presses keys based on 
 
 It uses OpenCV for image recognition and the pyautogui and keyboard libraries for key presses.
 
+This script detects when specific images appear on the screen and automatically presses the corresponding keyboard keys. It only runs when a window with a specified PID is active.
+
+## Features
+
+- Configurable image-key mappings
+- Enable or disable specific image-key mappings
+- Only active when a specified window is in focus
+
 ## Requirements
 
-- Python 3.7 or higher
-- OpenCV
-- pyautogui
-- keyboard
+- Python 3
+- OpenCV (`opencv-python`)
+- NumPy
+- PyAutoGUI
+- PyScreenshot
+- ctypes (built-in with Python)
 - colorama
-- numpy
 
 ## Installation
 
 1. Install the required Python libraries:
 
 ```bash
-pip install opencv-python-headless pyautogui keyboard colorama numpy
+pip install opencv-python numpy pyautogui pyscreenshot colorama
 ```
 
 ## Usage
