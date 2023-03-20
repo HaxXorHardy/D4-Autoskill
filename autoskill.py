@@ -5,8 +5,10 @@ import pyscreenshot as ImageGrab
 import json
 import time
 import ctypes
+from colorama import init, Fore
 
 TARGET_PID = 4388
+init(autoreset=True)  # Initialize colorama
 
 def load_config():
     with open("config.json", "r") as f:
@@ -37,7 +39,7 @@ def main():
 
     while True:
         if not is_target_window_active():
-            print("Target window is not active")
+            print(Fore.YELLOW + "Target window is not active")
             time.sleep(1)
             continue
 
@@ -49,11 +51,11 @@ def main():
             image = cv2.imread(match["image"], cv2.IMREAD_COLOR)
             if find_image_on_screen(image) is not None:
                 match_found = True
-                print(f"Match found for {match['image']}, pressing key {match['key']}")
+                print(Fore.GREEN + f"Match found for {match['image']}, pressing key {match['key']}")
                 pyautogui.press(match["key"])
 
         if not match_found:
-            print("No match found")
+            print(Fore.RED + "No match found")
 
         time.sleep(0.1)
 
