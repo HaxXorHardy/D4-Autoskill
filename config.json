@@ -1,0 +1,24 @@
+{
+  "matches": [
+    {
+      "image": "images/Skill1.png",
+      "key": "1",
+	  "ignore": false
+    },
+    {
+      "image": "images/Skill2.png",
+      "key": "2",
+	  "ignore": false
+    },
+    {
+      "image": "images/Skill3.png",
+      "key": "3",
+	  "ignore": false
+    },
+    {
+      "image": "images/Skill4.png",
+      "key": "4",
+	  "ignore": true
+    }
+  ]
+}
