@@ -1,50 +1,61 @@
-import json
-import time
 import cv2
 import numpy as np
 import pyautogui
-import keyboard
-from colorama import init, Fore
+import pyscreenshot as ImageGrab
+import json
+import time
+import ctypes
 
-init(autoreset=True)
+TARGET_PID = 4388
 
-def load_config(file_path):
-    with open(file_path, 'r') as file:
-        return json.load(file)
+def load_config():
+    with open("config.json", "r") as f:
+        return json.load(f)
 
-def find_image_on_screen(image_path, threshold=0.5):
-    screen = pyautogui.screenshot()
-    screen_np = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-    template = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    res = cv2.matchTemplate(screen_np, template, cv2.TM_CCOEFF_NORMED)
-    loc = np.where(res >= threshold)
-    return len(loc[0]) > 0
+def find_image_on_screen(template, threshold=0.9):
+    screenshot = ImageGrab.grab()
+    screen = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+
+    result = cv2.matchTemplate(screen, template, cv2.TM_CCOEFF_NORMED)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+
+    if max_val >= threshold:
+        return max_loc
+    return None
+
+def is_target_window_active():
+    GetForegroundWindow = ctypes.windll.user32.GetForegroundWindow
+    GetWindowThreadProcessId = ctypes.windll.user32.GetWindowThreadProcessId
+
+    hwnd = GetForegroundWindow()
+    pid = ctypes.wintypes.DWORD()
+    GetWindowThreadProcessId(hwnd, ctypes.pointer(pid))
+    return pid.value == TARGET_PID
 
 def main():
-    config = load_config("config.json")
-    last_state = {match["image"]: False for match in config["matches"]}
+    config = load_config()
 
     while True:
+        if not is_target_window_active():
+            print("Target window is not active")
+            time.sleep(1)
+            continue
+
+        match_found = False
         for match in config["matches"]:
-            if match.get("ignore", False):
+            if not match["enabled"]:
                 continue
 
-            image_path = match["image"]
-            key = match["key"]
-            found = find_image_on_screen(image_path)
+            image = cv2.imread(match["image"], cv2.IMREAD_COLOR)
+            if find_image_on_screen(image) is not None:
+                match_found = True
+                print(f"Match found for {match['image']}, pressing key {match['key']}")
+                pyautogui.press(match["key"])
 
-            if not last_state[image_path] and found:
-                print(f"{Fore.GREEN}Casting Skill, Pressing Key {key}")
-                keyboard.press(key)
-                time.sleep(0.1)  # Add a small delay between press and release
-                keyboard.release(key)
-            else:
-                print(f"{Fore.YELLOW}Waiting for cooldown.")
-
-            last_state[image_path] = found
+        if not match_found:
+            print("No match found")
 
         time.sleep(0.1)
-
 
 if __name__ == "__main__":
     main()
